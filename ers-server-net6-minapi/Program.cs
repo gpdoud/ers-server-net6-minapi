@@ -10,12 +10,13 @@ builder.Services.AddDbContext<AppDbContext>(x => {
 #endif
     x.UseSqlServer(builder.Configuration.GetConnectionString(connStrKey));
 });
-builder.Services.AddCors(x =>
-    x.AddPolicy("ProdCors", x =>
-        x.WithOrigins("http://localhost:4200", "http://localhost")
+builder.Services.AddCors(x => 
+    x.AddPolicy("ErsCorsPolicy", x =>
+        x.WithOrigins("http://localhost:4200")
          .AllowAnyHeader()
          .AllowAnyMethod()
-    ));
+    )
+);
 
 // Add services to the container.
 
@@ -23,9 +24,9 @@ var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 
-app.UseMiddleware<ApiKeyMiddleware>();
+app.UseCors("ErsCorsPolicy");
 
-app.UseCors("ProdCors");
+app.UseMiddleware<ApiKeyMiddleware>();
 
 using(var scope = app.Services.GetRequiredService<IServiceScopeFactory>().CreateScope()) {
     scope.ServiceProvider.GetService<AppDbContext>()!.Database.Migrate();
